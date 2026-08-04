@@ -8,6 +8,11 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Next.js bakes next.config rewrites() at BUILD time, so the backend URL must be
+# present now — not just at runtime. Render (and `docker compose ... args`) pass
+# the service's BACKEND_INTERNAL_URL in via this build arg.
+ARG BACKEND_INTERNAL_URL
+ENV BACKEND_INTERNAL_URL=$BACKEND_INTERNAL_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
