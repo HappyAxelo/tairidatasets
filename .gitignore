@@ -32,3 +32,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Nested clone created during local testing — not part of the repo
+tairidatasets/

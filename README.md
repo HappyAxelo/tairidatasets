@@ -73,6 +73,20 @@ The database is created and seeded automatically on first boot.
 
 > ⚠️ Change all seeded passwords before any real deployment.
 
+## ☁️ Free public deployment (Render)
+
+Want a live public URL for free? The repo includes a one-file
+[`render.yaml`](render.yaml) blueprint that provisions the frontend, backend and
+a PostgreSQL database on [Render](https://render.com)'s free tier.
+
+1. Sign in to Render → **New +** → **Blueprint** → connect this repo → **Apply**.
+2. After the first build, set the two service URLs (frontend
+   `BACKEND_INTERNAL_URL`, backend `FRONTEND_URL`).
+3. Open the frontend URL and log in with the seeded accounts above.
+
+Full click-by-click walkthrough (plus permanent free database and file storage):
+**[docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md)**.
+
 ## 🛠️ Local development (without Docker)
 
 **Backend**

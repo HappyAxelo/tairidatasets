@@ -1,0 +1,80 @@
+# ---------------------------------------------------------------------------
+# TAIRI DataHub — Render.com blueprint (free tier).
+#
+# Provisions three resources from this single file:
+#   1. tairi-db        — managed PostgreSQL 16
+#   2. tairi-backend   — FastAPI (Docker), seeds the DB on first boot
+#   3. tairi-frontend  — Next.js (Docker), public URL users visit
+#
+# Deploy:  Render Dashboard → New → Blueprint → connect this repo → Apply.
+# After the first apply, set the two cross-service URLs (see README →
+# "Free deployment on Render"), then trigger a redeploy of both web services.
+#
+# Free-tier notes:
+#   * Web services sleep after ~15 min idle; first request wakes them (~30-50s).
+#   * The free database has a limited lifetime — swap DATABASE_URL for a free
+#     Neon/Supabase Postgres to keep data permanently (one env-var change).
+#   * Uploaded files live on an ephemeral disk (wiped on redeploy). Set
+#     STORAGE_BACKEND=s3 + S3_* vars to persist them (backend already supports it).
+# ---------------------------------------------------------------------------
+databases:
+  - name: tairi-db
+    plan: free
+    databaseName: tairi_datahub
+    user: tairi
+    region: oregon
+
+services:
+  # --- Backend API -------------------------------------------------------- #
+  - type: web
+    name: tairi-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tairi-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true          # Render generates a strong random secret.
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: STORAGE_BACKEND
+        value: local
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: SUPERADMIN_DEFAULT_PASSWORD
+        value: ChangeMe#2026          # Change after first login.
+      - key: BACKEND_CORS_ORIGINS
+        value: "*"
+      # Set to the frontend's public URL after the first deploy (used in emails).
+      - key: FRONTEND_URL
+        sync: false
+
+  # --- Frontend (Next.js) ------------------------------------------------- #
+  - type: web
+    name: tairi-frontend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      # Set to the backend's public URL (https://tairi-backend.onrender.com)
+      # after the first deploy. The Next server proxies /api/* to this URL.
+      - key: BACKEND_INTERNAL_URL
+        sync: false

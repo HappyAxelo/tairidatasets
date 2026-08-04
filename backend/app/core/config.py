@@ -54,11 +54,27 @@ class Settings(BaseSettings):
     @property
     def sqlalchemy_database_uri(self) -> str:
         if self.DATABASE_URL:
-            return self.DATABASE_URL
+            return self._normalize_db_url(self.DATABASE_URL)
         return (
             f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
+
+    @staticmethod
+    def _normalize_db_url(url: str) -> str:
+        """Normalise a provider-supplied connection string for SQLAlchemy.
+
+        Managed hosts (Render, Neon, Supabase, Heroku) hand out URLs beginning
+        with ``postgres://`` or ``postgresql://``, which SQLAlchemy would route
+        to the psycopg2 driver. This project uses psycopg 3, so the scheme is
+        rewritten to ``postgresql+psycopg://``. SQLite URLs pass through
+        untouched for local/test use.
+        """
+        if url.startswith("postgres://"):
+            url = "postgresql://" + url[len("postgres://"):]
+        if url.startswith("postgresql://"):
+            url = "postgresql+psycopg://" + url[len("postgresql://"):]
+        return url
 
     # --- CORS ----------------------------------------------------------------
     BACKEND_CORS_ORIGINS: List[str] = Field(
