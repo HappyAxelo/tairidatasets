@@ -8,10 +8,10 @@ business logic.
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import List
+from typing import Annotated, List
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -77,15 +77,23 @@ class Settings(BaseSettings):
         return url
 
     # --- CORS ----------------------------------------------------------------
-    BACKEND_CORS_ORIGINS: List[str] = Field(
+    # NoDecode disables pydantic-settings' automatic JSON parsing of list env
+    # vars, so plain values like "*" or "https://a.com,https://b.com" are handled
+    # by the validator below instead of failing a json.loads() call.
+    BACKEND_CORS_ORIGINS: Annotated[List[str], NoDecode] = Field(
         default=["http://localhost:3000", "http://127.0.0.1:3000"]
     )
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def _split_cors(cls, value):  # noqa: D401
-        if isinstance(value, str) and not value.startswith("["):
-            return [item.strip() for item in value.split(",") if item.strip()]
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.startswith("["):
+                import json
+
+                return json.loads(stripped)
+            return [item.strip() for item in stripped.split(",") if item.strip()]
         return value
 
     # --- Storage -------------------------------------------------------------
@@ -115,7 +123,7 @@ class Settings(BaseSettings):
 
     # --- Bootstrap super administrators -------------------------------------
     # Exactly three super-admin accounts are provisioned during seeding.
-    SUPERADMIN_EMAILS: List[str] = Field(
+    SUPERADMIN_EMAILS: Annotated[List[str], NoDecode] = Field(
         default=[
             "admin1@tairi.ur.ac.rw",
             "admin2@tairi.ur.ac.rw",
@@ -127,8 +135,13 @@ class Settings(BaseSettings):
     @field_validator("SUPERADMIN_EMAILS", mode="before")
     @classmethod
     def _split_admins(cls, value):
-        if isinstance(value, str) and not value.startswith("["):
-            return [item.strip() for item in value.split(",") if item.strip()]
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.startswith("["):
+                import json
+
+                return json.loads(stripped)
+            return [item.strip() for item in stripped.split(",") if item.strip()]
         return value
 
 
