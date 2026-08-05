@@ -76,12 +76,6 @@ function LoginInner() {
         </Link>
       </p>
 
-      <div className="mt-8 rounded-lg border border-border bg-muted/50 p-4 text-xs text-ink-faint">
-        <p className="font-medium text-ink-soft">Demo accounts</p>
-        <p className="mt-1">Student: aline.uwase@student.ur.ac.rw · Student#2026</p>
-        <p>Researcher: researcher@ur.ac.rw · Researcher#2026</p>
-        <p>Admin: admin1@tairi.ur.ac.rw · ChangeMe#2026</p>
-      </div>
     </div>
   );
 }
