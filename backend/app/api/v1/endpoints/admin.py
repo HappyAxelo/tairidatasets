@@ -12,7 +12,7 @@ from app.core.database import get_db
 from app.core.deps import client_ip, require_super_admin
 from app.core.security import generate_url_safe_token, hash_password
 from app.models.access import AccessRequest, Download
-from app.models.dataset import Dataset
+from app.models.dataset import Dataset, DatasetVersion, File
 from app.models.enums import (
     AccessRequestStatus,
     DatasetStatus,
@@ -38,6 +38,7 @@ from app.schemas.common import Message
 from app.schemas.user import UserAdminCreate, UserRead
 from app.services import email as email_service
 from app.services.notifications import create_notification, write_audit
+from app.services.storage import get_storage
 
 router = APIRouter(prefix="/admin", tags=["Admin"], dependencies=[Depends(require_super_admin)])
 
@@ -269,6 +270,75 @@ def restore_dataset(dataset_id: int, db: Session = Depends(get_db), admin: User 
     write_audit(db, actor_id=admin.id, action="admin.restore_dataset", entity_type="dataset", entity_id=dataset_id)
     db.commit()
     return Message(detail="Dataset restored")
+
+
+@router.get("/datasets", response_model=List[dict])
+def list_all_datasets(include_deleted: bool = True, db: Session = Depends(get_db)):
+    """Every dataset for the admin management table, newest first."""
+    stmt = select(Dataset).order_by(Dataset.created_at.desc())
+    if not include_deleted:
+        stmt = stmt.where(Dataset.is_deleted.is_(False))
+    rows = db.scalars(stmt.limit(500)).unique().all()
+    return [
+        {
+            "id": d.id,
+            "slug": d.slug,
+            "title": d.title,
+            "owner": d.owner.username if d.owner else None,
+            "status": d.status.value,
+            "is_deleted": d.is_deleted,
+            "visibility": d.visibility.value,
+            "download_count": d.download_count,
+            "file_count": d.file_count,
+            "created_at": d.created_at.isoformat(),
+        }
+        for d in rows
+    ]
+
+
+@router.delete("/datasets/{dataset_id}", response_model=Message)
+def delete_dataset_admin(
+    dataset_id: int,
+    permanent: bool = False,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin),
+):
+    """Delete a dataset from the admin console.
+
+    By default this is a soft delete (recoverable via *restore*). Passing
+    ``permanent=true`` hard-deletes the dataset: its stored file objects are
+    removed and the row is dropped (cascading to versions, files, requests,
+    downloads, etc.). Permanent deletion cannot be undone.
+    """
+    dataset = db.get(Dataset, dataset_id)
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    if permanent:
+        title = dataset.title
+        storage = get_storage()
+        files = db.scalars(
+            select(File)
+            .join(DatasetVersion, File.version_id == DatasetVersion.id)
+            .where(DatasetVersion.dataset_id == dataset_id)
+        ).all()
+        for f in files:
+            try:
+                storage.delete(f.storage_key)
+            except Exception:  # pragma: no cover - best effort cleanup
+                pass
+        db.delete(dataset)
+        write_audit(db, actor_id=admin.id, action="admin.delete_dataset_permanent",
+                    entity_type="dataset", entity_id=dataset_id, detail=title)
+        db.commit()
+        return Message(detail="Dataset permanently deleted")
+
+    dataset.is_deleted = True
+    dataset.status = DatasetStatus.DELETED
+    write_audit(db, actor_id=admin.id, action="admin.delete_dataset",
+                entity_type="dataset", entity_id=dataset_id)
+    db.commit()
+    return Message(detail="Dataset deleted (recoverable via restore)")
 
 
 # --------------------------------------------------------------------------- #

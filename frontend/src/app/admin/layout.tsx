@@ -6,7 +6,7 @@ import { DashboardShell, type NavItem } from "@/components/layout/dashboard-shel
 const ITEMS: NavItem[] = [
   { href: "/admin", label: "Analytics", icon: <LayoutDashboard size={16} /> },
   { href: "/admin/users", label: "Users", icon: <Users size={16} /> },
-  { href: "/admin/datasets", label: "Moderation", icon: <Database size={16} /> },
+  { href: "/admin/datasets", label: "Datasets", icon: <Database size={16} /> },
   { href: "/admin/requests", label: "Requests", icon: <ClipboardList size={16} /> },
   { href: "/admin/logs", label: "Audit logs", icon: <ScrollText size={16} /> },
 ];
