@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "TAIRI DataHub — A Trusted Repository for AI Research Datasets",
+    default: "TAIRI DataHub: A Trusted Repository for AI Research Datasets",
     template: "%s · TAIRI DataHub",
   },
   description:
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   authors: [{ name: "TAIRI Lab, University of Rwanda" }],
   openGraph: {
     title: "TAIRI DataHub",
-    description: "A Trusted Repository for AI Research Datasets — TAIRI Lab, University of Rwanda.",
+    description: "A Trusted Repository for AI Research Datasets TAIRI Lab, University of Rwanda.",
     type: "website",
   },
 };
