@@ -92,7 +92,7 @@ export default function LandingPage() {
               <span className="text-brand-600">AI research datasets</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
-              Discover, share, cite and manage research datasets across every domain — from
+              Discover, share, cite and manage research datasets across every domain from
               agriculture and healthcare to computer vision and climate science. Secure,
               citable and built for the research community.
             </p>
@@ -191,7 +191,7 @@ export default function LandingPage() {
           <Feature
             icon={<Database size={22} />}
             title="Any data type"
-            text="CSV, images, audio, video, medical scans, satellite imagery, notebooks — no restrictions on formats."
+            text="CSV, images, audio, video, medical scans, satellite imagery, notebooks no restrictions on formats."
           />
           <Feature
             icon={<Download size={22} />}
