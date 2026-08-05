@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
+    # When True the seeder inserts sample demo datasets (handy for local dev).
+    # False in production so the catalogue contains only real user uploads;
+    # in that mode the seeder also purges any previously-seeded demo datasets.
+    SEED_DEMO_DATA: bool = False
 
     # --- Security ------------------------------------------------------------
     SECRET_KEY: str = "change-me-in-production-please-use-a-long-random-string"

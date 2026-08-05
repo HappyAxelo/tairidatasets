@@ -285,6 +285,32 @@ def seed_datasets(db, students: list[User]) -> None:
     db.flush()
 
 
+# A demo dataset is identified by BOTH its exact seeded title and description,
+# so a real user-uploaded dataset can never be matched and removed by accident.
+DEMO_SIGNATURES = {(spec["title"], spec["description"]) for spec in DEMO_DATASETS}
+
+
+def purge_demo_datasets(db) -> None:
+    """Delete previously-seeded demo datasets, leaving only real uploads.
+
+    Runs when ``SEED_DEMO_DATA`` is disabled (the production default). Idempotent:
+    once the demo rows are gone there is nothing left to remove. Child rows
+    (versions, files, requests, downloads, views, comments, favorites) are
+    removed automatically via ORM cascade / ``ON DELETE CASCADE``.
+    """
+    demo_titles = [spec["title"] for spec in DEMO_DATASETS]
+    candidates = db.scalars(
+        select(Dataset).where(Dataset.title.in_(demo_titles))
+    ).all()
+    removed = 0
+    for dataset in candidates:
+        if (dataset.title, dataset.description) in DEMO_SIGNATURES:
+            db.delete(dataset)
+            removed += 1
+    if removed:
+        log.info("Removed %d seeded demo dataset(s).", removed)
+
+
 def run() -> None:
     log.info("Creating tables...")
     Base.metadata.create_all(bind=engine)
@@ -294,7 +320,11 @@ def run() -> None:
         seed_taxonomy(db)
         students = seed_users(db, roles)
         db.commit()
-        seed_datasets(db, students)
+        if settings.SEED_DEMO_DATA:
+            seed_datasets(db, students)
+        else:
+            # Production: keep the catalogue limited to real user uploads.
+            purge_demo_datasets(db)
         db.commit()
         log.info("Seed complete.")
     finally:
