@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { BookOpen, Code2, Download, Upload, UserPlus } from "lucide-react";
 
 export const metadata: Metadata = { title: "Documentation" };
@@ -79,16 +78,6 @@ export default function DocumentationPage() {
             </ol>
           </div>
         ))}
-      </div>
-
-      <div className="mt-10 rounded-lg border border-brand-200 bg-brand-50/60 p-6">
-        <p className="text-sm text-ink-soft">
-          For full installation, deployment and administrator guides, see the{" "}
-          <Link href="https://github.com/HappyAxelo/tairidatasets" className="font-medium text-brand-600 hover:underline">
-            project repository
-          </Link>
-          .
-        </p>
       </div>
     </div>
   );
