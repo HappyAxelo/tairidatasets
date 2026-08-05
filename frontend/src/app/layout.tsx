@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "TAIRI DataHub: A Trusted Repository for AI Research Datasets",
+    default: "TAIRI DataHub",
     template: "%s · TAIRI DataHub",
   },
   description:
