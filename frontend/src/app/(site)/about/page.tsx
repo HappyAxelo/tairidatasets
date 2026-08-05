@@ -45,7 +45,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-semibold">Our mission</h2>
         <p className="mt-3 max-w-3xl leading-relaxed text-ink-soft">
           To accelerate high-impact, ethical AI research in Rwanda and across Africa by making
-          research data discoverable, reusable and trustworthy — while respecting the privacy and
+          research data discoverable, reusable and trustworthy while respecting the privacy and
           governance requirements of the data it holds.
         </p>
       </div>
