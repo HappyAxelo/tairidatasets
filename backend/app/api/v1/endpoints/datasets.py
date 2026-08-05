@@ -406,10 +406,28 @@ def download_file(
     db.commit()
 
     stream = storage.open(record.storage_key)
+
+    def _iterfile():
+        # Chunked streaming works uniformly for a local file object and for an
+        # S3/MinIO StreamingBody, and guarantees the handle is closed.
+        try:
+            while True:
+                chunk = stream.read(1024 * 1024)
+                if not chunk:
+                    break
+                yield chunk
+        finally:
+            close = getattr(stream, "close", None)
+            if callable(close):
+                close()
+
     return StreamingResponse(
-        stream,
+        _iterfile(),
         media_type=record.content_type or "application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{record.filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{record.filename}"',
+            "Content-Length": str(record.size_bytes),
+        },
     )
 
 
