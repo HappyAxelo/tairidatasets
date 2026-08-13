@@ -77,6 +77,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   let res = await doFetch();
 
+  // The API may be briefly unavailable while a free-tier/host instance wakes
+  // from sleep or restarts, returning a 502/503/504 gateway page. Retry a few
+  // times with backoff so a cold start doesn't surface as an error to the user.
+  const GATEWAY = new Set([502, 503, 504]);
+  for (let attempt = 0; attempt < 4 && GATEWAY.has(res.status); attempt++) {
+    await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+    res = await doFetch();
+  }
+
   // Attempt a single transparent refresh on 401.
   if (res.status === 401 && auth && tokenStore.refresh) {
     const refreshed = await refreshAccessToken();
@@ -91,10 +100,20 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     : await res.text();
 
   if (!res.ok) {
-    const message =
+    if (GATEWAY.has(res.status)) {
+      throw new ApiError(
+        res.status,
+        "The server is starting up (this can take up to a minute on first use). Please try again in a moment.",
+      );
+    }
+    let message =
       (payload && typeof payload === "object" && (payload as any).detail) ||
       (typeof payload === "string" && payload) ||
       `Request failed (${res.status})`;
+    // Never surface a raw HTML error page (e.g. a host gateway page) to users.
+    if (typeof message === "string" && message.trimStart().startsWith("<")) {
+      message = `Request failed (${res.status})`;
+    }
     throw new ApiError(res.status, Array.isArray(message) ? message[0]?.msg ?? "Invalid input" : message);
   }
   return payload as T;
