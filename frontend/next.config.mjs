@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // Docker (Render/self-host) needs the slim standalone server; on Vercel use
+  // its native build output instead (Vercel sets the VERCEL env var).
+  output: process.env.VERCEL ? undefined : "standalone",
   // Lint is run separately in CI; do not fail production builds on lint.
   eslint: { ignoreDuringBuilds: true },
   // Proxy API + WebSocket traffic to the backend in development so the SPA can
