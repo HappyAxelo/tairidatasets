@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import client_ip, require_super_admin
 from app.core.security import generate_url_safe_token, hash_password
@@ -210,6 +211,10 @@ def admin_reset_password(user_id: int, db: Session = Depends(get_db), admin: Use
     user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=24)
     db.commit()
     email_service.send_password_reset(user.email, token)
+    if not settings.SMTP_HOST:
+        # No mail server: hand the link to the admin so they can pass it on.
+        link = email_service.password_reset_link(token)
+        return Message(detail=f"Email is not configured. Share this reset link with the user: {link}")
     return Message(detail="Password reset email sent")
 
 

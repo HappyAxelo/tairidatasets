@@ -154,11 +154,11 @@ def forgot_password(payload: PasswordResetRequest, db: Session = Depends(get_db)
 @router.post("/reset-password", response_model=Message)
 def reset_password(payload: PasswordResetConfirm, db: Session = Depends(get_db)):
     user = db.scalar(select(User).where(User.password_reset_token == payload.token))
-    if (
-        not user
-        or not user.password_reset_expires
-        or user.password_reset_expires < datetime.now(timezone.utc)
-    ):
+    expires = user.password_reset_expires if user else None
+    # Some backends (e.g. SQLite) hand back naive datetimes; treat them as UTC.
+    if expires and expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    if not user or not expires or expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
     user.hashed_password = hash_password(payload.new_password)
     user.password_reset_token = None

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/primitives";
-import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { api, ApiError } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -17,8 +18,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       await api.post("/auth/forgot-password", { email }, { auth: false });
-    } finally {
       setSent(true);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Could not send reset link");
+    } finally {
       setLoading(false);
     }
   };

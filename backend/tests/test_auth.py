@@ -49,3 +49,60 @@ def test_refresh_token(client, seeded):
     })
     assert refresh.status_code == 200
     assert "access_token" in refresh.json()
+
+
+def test_password_reset_flow(client, seeded, db_session):
+    from app.models.user import User
+
+    email = "researcher@ur.ac.rw"
+    resp = client.post("/api/v1/auth/forgot-password", json={"email": email})
+    assert resp.status_code == 200
+    user = db_session.query(User).filter_by(email=email).one()
+    token = user.password_reset_token
+    assert token
+
+    resp = client.post("/api/v1/auth/reset-password", json={
+        "token": token, "new_password": "BrandNew#2026",
+    })
+    assert resp.status_code == 200, resp.text
+    login = client.post("/api/v1/auth/login/json", json={
+        "email": email, "password": "BrandNew#2026",
+    })
+    assert login.status_code == 200
+    # Token is single-use.
+    again = client.post("/api/v1/auth/reset-password", json={
+        "token": token, "new_password": "Another#2026",
+    })
+    assert again.status_code == 400
+
+    # Restore the seeded password so later tests can still sign in.
+    from app.core.security import hash_password
+    user.hashed_password = hash_password("Researcher#2026")
+    db_session.commit()
+
+
+def test_browsing_does_not_consume_login_budget(monkeypatch):
+    import asyncio
+
+    from starlette.requests import Request
+    from starlette.responses import Response
+
+    from app.core.config import settings
+    from app.core.middleware import RateLimitMiddleware
+
+    monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", True)
+    mw = RateLimitMiddleware(app=None, limit=1000, window=60)
+
+    async def ok(_request):
+        return Response("ok")
+
+    def call(path: str) -> int:
+        scope = {"type": "http", "method": "GET", "path": path, "headers": [],
+                 "client": ("1.2.3.4", 1234), "query_string": b""}
+        return asyncio.run(mw.dispatch(Request(scope), ok)).status_code
+
+    for _ in range(100):
+        assert call("/api/v1/datasets") == 200
+    assert call("/api/v1/auth/login/json") == 200
+    statuses = [call("/api/v1/auth/login/json") for _ in range(settings.RATE_LIMIT_AUTH_REQUESTS)]
+    assert statuses[-1] == 429

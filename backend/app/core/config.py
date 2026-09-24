@@ -44,7 +44,9 @@ class Settings(BaseSettings):
     SESSION_TIMEOUT_MINUTES: int = 60
     # Rate limiting can be disabled (e.g. in tests) or tuned per deployment.
     RATE_LIMIT_ENABLED: bool = True
-    RATE_LIMIT_REQUESTS: int = 120
+    RATE_LIMIT_REQUESTS: int = 300
+    # Separate, stricter budget for login/register/password-reset endpoints.
+    RATE_LIMIT_AUTH_REQUESTS: int = 30
     RATE_LIMIT_WINDOW_SECONDS: int = 60
 
     # --- Database ------------------------------------------------------------

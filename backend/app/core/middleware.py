@@ -30,8 +30,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Fixed-window rate limiter keyed by client IP.
 
-    Defaults to 120 requests / 60s. Auth endpoints get a stricter budget to
-    slow credential-stuffing.
+    General traffic and auth endpoints are counted in separate buckets; auth
+    endpoints get a stricter budget to slow credential-stuffing.
     """
 
     def __init__(self, app, limit: int = 120, window: int = 60) -> None:
@@ -55,14 +55,19 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         ):
             return await call_next(request)
 
-        key = self._client(request)
+        # Auth surfaces get their own, stricter bucket. Keeping it separate means
+        # ordinary browsing (which fires many API calls per page) can never
+        # use up a visitor's login budget.
+        is_auth = request.url.path.endswith(
+            ("/login", "/login/json", "/register", "/forgot-password", "/reset-password")
+        )
+        client = self._client(request)
+        key = f"auth:{client}" if is_auth else client
+        limit = settings.RATE_LIMIT_AUTH_REQUESTS if is_auth else self.limit
+
         now = time.time()
         window_start = now - self.window
         hits = [t for t in self._hits[key] if t > window_start]
-
-        limit = self.limit
-        if request.url.path.endswith(("/login", "/login/json", "/register", "/forgot-password")):
-            limit = 15  # stricter for auth surfaces
 
         if len(hits) >= limit:
             return JSONResponse(

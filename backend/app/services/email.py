@@ -83,8 +83,12 @@ def send_verification(to: str, username: str, token: str) -> None:
     send_email(to, "Verify your TAIRI DataHub email", body)
 
 
+def password_reset_link(token: str) -> str:
+    return f"{settings.FRONTEND_URL.rstrip('/')}/reset-password?token={token}"
+
+
 def send_password_reset(to: str, token: str) -> None:
-    link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+    link = password_reset_link(token)
     body = _wrap(
         "Reset your password",
         f'<p>We received a request to reset your password.</p>'

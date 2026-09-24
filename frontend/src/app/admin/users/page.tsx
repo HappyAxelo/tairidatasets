@@ -27,6 +27,21 @@ export default function AdminUsersPage() {
     catch (err) { toast.error(err instanceof ApiError ? err.message : "Action failed"); }
   };
 
+  const resetPassword = async (id: number) => {
+    try {
+      const res = await api.post<{ detail: string }>(`/admin/users/${id}/reset-password`);
+      const link = res.detail.match(/https?:\/\/\S+/)?.[0];
+      if (link) {
+        // No mail server configured: let the admin copy the link to share it.
+        window.prompt("Email is not configured. Copy this reset link and send it to the user:", link);
+      } else {
+        toast.success(res.detail);
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Action failed");
+    }
+  };
+
   if (users === null)
     return <div className="flex justify-center py-24 text-brand-500"><Spinner className="h-6 w-6" /></div>;
 
@@ -73,7 +88,7 @@ export default function AdminUsersPage() {
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1">
                     <Button size="sm" variant="ghost" title="Reset password"
-                      onClick={() => act(() => api.post(`/admin/users/${u.id}/reset-password`), "Reset email sent")}>
+                      onClick={() => resetPassword(u.id)}>
                       <KeyRound size={14} />
                     </Button>
                     {u.status === "suspended" ? (
