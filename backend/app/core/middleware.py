@@ -63,17 +63,24 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         )
         client = self._client(request)
         key = f"auth:{client}" if is_auth else client
-        limit = settings.RATE_LIMIT_AUTH_REQUESTS if is_auth else self.limit
-
+        limit = (
+    settings.RATE_LIMIT_AUTH_REQUESTS
+    if is_auth
+    else settings.RATE_LIMIT_REQUESTS
+)
         now = time.time()
-        window_start = now - self.window
+        window = settings.RATE_LIMIT_WINDOW_SECONDS
+        window_start = now - window
         hits = [t for t in self._hits[key] if t > window_start]
 
         if len(hits) >= limit:
+            retry_after = max(1, int(window - (now - hits[0])) + 1)
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too many requests, please slow down."},
+                headers={"Retry-After": str(retry_after)},
             )
+
         hits.append(now)
         self._hits[key] = hits
         return await call_next(request)
