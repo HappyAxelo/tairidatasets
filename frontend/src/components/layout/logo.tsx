@@ -6,7 +6,7 @@ export function Logo({ className, mono = false }: { className?: string; mono?: b
   return (
     <Link href="/" className={cn("group inline-flex items-center gap-2.5", className)}>
       <Image
-        src="/TAIRI.jpeg"
+        src="/TAIRILOGO.png"
         alt=""
         width={45}
         height={32}
