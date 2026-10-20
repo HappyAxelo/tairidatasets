@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, LayoutDashboard, LogOut, Menu, Search, Upload, User, X } from "lucide-react";
-import { Logo } from "./logo";
+import { PartnerLogos, TairiLogo } from "./logo";
 import { NotificationBell } from "./notification-bell";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/primitives";
@@ -32,9 +32,11 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur">
-      <div className="container-tight flex h-16 items-center gap-4">
-        <Logo />
+      <div className="container-tight flex h-20 items-center gap-4 md:h-24">
+        {/* LEFT: UR + ACEIoT */}
+        <PartnerLogos className="shrink-0" />
 
+        {/* MIDDLE: menu */}
         <nav className="ml-4 hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l) => (
             <Link
@@ -50,7 +52,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <form onSubmit={submitSearch} className="ml-auto hidden max-w-xs flex-1 lg:block">
+        <form onSubmit={submitSearch} className="ml-auto hidden max-w-xs flex-1 xl:block">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
             <input
@@ -62,7 +64,8 @@ export function Navbar() {
           </div>
         </form>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-2">
+        {/* RIGHT: account controls, then TAIRI in the far right corner */}
+        <div className="ml-auto flex items-center gap-2 xl:ml-2">
           {user ? (
             <>
               {isRole("student_researcher", "super_admin") && (
@@ -124,6 +127,10 @@ export function Navbar() {
               </Link>
             </div>
           )}
+
+          {/* TAIRI logo, far right (hidden on very small phones) */}
+          <span className="ml-2 hidden h-10 w-px bg-border sm:block" />
+          <TairiLogo className="hidden shrink-0 sm:inline-flex" />
 
           <button
             className="flex h-9 w-9 items-center justify-center rounded-md text-ink-soft hover:bg-muted md:hidden"
