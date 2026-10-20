@@ -7,20 +7,18 @@ export function PartnerLogos({ className, mono = false }: { className?: string; 
   return (
     <div className={cn("inline-flex items-center gap-5", className)}>
       <a href="https://www.ur.ac.rw" target="_blank" rel="noopener noreferrer">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src="/URLOGO.png"
           alt="University of Rwanda"
-          width={160}
-          height={80}
           className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
         />
       </a>
       <span className={cn("h-10 w-px", mono ? "bg-white/20" : "bg-ink/10")} />
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/ACEIOT.png"
         alt="ACEIoT"
-        width={160}
-        height={80}
         className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
       />
     </div>
