@@ -2,20 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** UR + ACEIoT, for the left side of the header */
-export function PartnerLogos({ className, mono = false }: { className?: string; mono?: boolean }) {
-  return (
-    <div className={cn("inline-flex items-center gap-5", className)}>
-      <a href="https://www.ur.ac.rw" target="_blank" rel="noopener noreferrer">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <image
-          src="/URbg.png"
-          alt="University of Rwanda"
-          className=import Image from "next/image";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-
-/** UR + ACEIoT, for the left side of the header */
+//** UR + ACEIoT, for the left side of the header */
 export function PartnerLogos({ className, mono = false }: { className?: string; mono?: boolean }) {
   return (
     <div className={cn("inline-flex items-center gap-5", className)}>
