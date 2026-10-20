@@ -10,7 +10,7 @@ export function PartnerLogos({ className, mono = false }: { className?: string; 
         <Image
           src="/URLOGO.png"
           alt="University of Rwanda"
-          width={200}
+          width={160}
           height={80}
           className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
         />
@@ -19,7 +19,7 @@ export function PartnerLogos({ className, mono = false }: { className?: string; 
       <Image
         src="/ACEIOT.png"
         alt="ACEIoT"
-        width={200}
+        width={160}
         height={80}
         className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
       />
