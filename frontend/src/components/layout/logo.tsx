@@ -8,7 +8,7 @@ export function Logo({ className, mono = false }: { className?: string; mono?: b
       <Image
         src="/TAIRI.jpeg"
         alt=""
-        width={32}
+        width={40}
         height={32}
         className="h-8 w-8 rounded-md object-contain"
       />
