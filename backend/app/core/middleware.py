@@ -34,7 +34,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     endpoints get a stricter budget to slow credential-stuffing.
     """
 
-    def __init__(self, app, limit: int = 240, window: int = 120) -> None:
+    def __init__(self, app, limit: int = 1_000_000, window: int = 120) -> None:
         super().__init__(app)
         self.limit = limit
         self.window = window
