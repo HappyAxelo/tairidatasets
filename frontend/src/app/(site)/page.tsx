@@ -66,32 +66,35 @@ export default function LandingPage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
+      {/* Hero with background photo */}
+      <section
+        className="relative overflow-hidden border-b border-border bg-cover bg-center"
+        style={{ backgroundImage: "url('/hero.jpg')" }}
+      >
+        {/* Dark blue overlay so the text stays readable on the photo */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(0,86,166,0.12) 1px, transparent 0)",
-            backgroundSize: "22px 22px",
+            background:
+              "linear-gradient(to right, rgba(0,35,80,0.92) 0%, rgba(0,35,80,0.78) 45%, rgba(0,35,80,0.35) 100%)",
           }}
         />
-        <div className="container-tight relative py-20 md:py-28">
+        <div className="container-tight relative py-24 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             className="max-w-3xl"
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-200" />
               TAIRI Lab · University of Rwanda
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-ink md:text-5xl">
+            <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-white md:text-5xl">
               A trusted repository for{" "}
-              <span className="text-brand-600">AI research datasets</span>
+              <span className="text-brand-200">AI research datasets</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85">
               Discover, share, cite and manage research datasets across every domain from
               agriculture and healthcare to computer vision and climate science. Secure,
               citable and built for the research community.
@@ -104,7 +107,7 @@ export default function LandingPage() {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search for datasets, e.g. rice disease, speech, air quality..."
-                  className="input-base h-12 pl-11 text-base"
+                  className="input-base h-12 bg-white pl-11 text-base text-ink"
                 />
               </div>
               <Button size="lg" type="submit">
@@ -113,10 +116,10 @@ export default function LandingPage() {
             </form>
 
             <div className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
-              <Stat value={`${formatNumber(stats.datasets)}+`} label="Datasets" />
-              <Stat value={`${formatNumber(stats.downloads)}+`} label="Downloads" />
-              <Stat value="16" label="Research domains" />
-              <Stat value="4" label="Colleges" />
+              <Stat light value={`${formatNumber(stats.datasets)}+`} label="Datasets" />
+              <Stat light value={`${formatNumber(stats.downloads)}+`} label="Downloads" />
+              <Stat light value="16" label="Research domains" />
+              <Stat light value="4" label="Colleges" />
             </div>
           </motion.div>
         </div>
@@ -227,11 +230,11 @@ export default function LandingPage() {
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({ value, label, light = false }: { value: string; label: string; light?: boolean }) {
   return (
     <div>
-      <p className="text-2xl font-bold text-ink">{value}</p>
-      <p className="text-sm text-ink-faint">{label}</p>
+      <p className={light ? "text-2xl font-bold text-white" : "text-2xl font-bold text-ink"}>{value}</p>
+      <p className={light ? "text-sm text-white/70" : "text-sm text-ink-faint"}>{label}</p>
     </div>
   );
 }
