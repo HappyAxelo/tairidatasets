@@ -4,17 +4,9 @@ import { cn } from "@/lib/utils";
 
 /** UR + ACEIoT, for the left side of the header */
 export function PartnerLogos({ className, mono = false }: { className?: string; mono?: boolean }) {
-  // On dark backgrounds (mono), put the logos on a white pill so they stay visible
-  const wrap = mono ? "rounded-md bg-white px-2 py-1" : "";
-
   return (
     <div className={cn("inline-flex items-center gap-5", className)}>
-      <a
-        href="https://www.ur.ac.rw"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={wrap}
-      >
+      <a href="https://www.ur.ac.rw" target="_blank" rel="noopener noreferrer">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/URbg.png"
@@ -22,17 +14,13 @@ export function PartnerLogos({ className, mono = false }: { className?: string; 
           className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
         />
       </a>
-
       <span className={cn("h-10 w-px", mono ? "bg-white/20" : "bg-ink/10")} />
-
-      <span className={wrap}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/ACEIoTbg.png"
-          alt="ACEIoT"
-          className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
-        />
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/ACEIoTbg.png"
+        alt="ACEIoT"
+        className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
+      />
     </div>
   );
 }
@@ -65,10 +53,10 @@ export function TairiLogo({ className, mono = false }: { className?: string; mon
   );
 }
 
-/** All three together (used where the full logo set is needed, e.g. the footer) */
+/** All three together (for the footer or other places) */
 export function Logo({ className, mono = false }: { className?: string; mono?: boolean }) {
   return (
-    <div className={cn("inline-flex flex-wrap items-center gap-5", className)}>
+    <div className={cn("inline-flex items-center gap-5", className)}>
       <PartnerLogos mono={mono} />
       <span className={cn("h-10 w-px", mono ? "bg-white/20" : "bg-ink/10")} />
       <TairiLogo mono={mono} />
