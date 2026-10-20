@@ -8,7 +8,7 @@ export function Logo({ className, mono = false }: { className?: string; mono?: b
       {/* 1. University of Rwanda */}
       <a href="https://www.ur.ac.rw" target="_blank" rel="noopener noreferrer">
         <Image
-          src="/UR_logos-removebg-preview.png"
+          src="/URbg.png"
           alt="University of Rwanda"
           width={120}
           height={40}
@@ -20,7 +20,7 @@ export function Logo({ className, mono = false }: { className?: string; mono?: b
 
       {/* 2. ACEIoT */}
       <Image
-        src="/ACEIoT-removebg-preview.png"
+        src="/ACEIoTbg.png"
         alt="ACEIoT"
         width={120}
         height={40}
@@ -34,8 +34,8 @@ export function Logo({ className, mono = false }: { className?: string; mono?: b
         <Image
           src="/TAIRILOGO.png"
           alt=""
-          width={45}
-          height={32}
+          width={120}
+          height={40}
           className="h-8 w-8 rounded-md object-contain transition-transform duration-300 group-hover:scale-105"
         />
         <span className="leading-tight">
