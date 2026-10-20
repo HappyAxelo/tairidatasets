@@ -68,7 +68,7 @@ export function Logo({ className, mono = false }: { className?: string; mono?: b
       <span className={cn("h-10 w-px", mono ? "bg-white/20" : "bg-ink/10")} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <image
-        src="/ACEIOT.png"
+        src="/ACEIoTbg.png"
         alt="ACEIoT"
         className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
       />
