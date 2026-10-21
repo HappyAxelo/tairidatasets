@@ -22,17 +22,57 @@ import { DatasetCard } from "@/components/dataset-card";
 import { api } from "@/lib/api";
 import type { DatasetListItem, Page } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
-
-const DOMAINS = [
-  { icon: <Brain size={20} />, label: "Artificial Intelligence" },
-  { icon: <Cpu size={20} />, label: "Machine Learning" },
-  { icon: <Microscope size={20} />, label: "Healthcare" },
-  { icon: <Leaf size={20} />, label: "Agriculture" },
-  { icon: <Radar size={20} />, label: "IoT & Sensors" },
-  { icon: <Sparkles size={20} />, label: "Computer Vision" },
-  { icon: <Shield size={20} />, label: "Cybersecurity" },
-  { icon: <Database size={20} />, label: "Remote Sensing" },
+const domains = [
+  {
+    name: "Artificial Intelligence",      // green (ACEIoT green)
+    icon: Brain,
+    card: "bg-[#EAF6EC] border-[#BFE3C7] hover:border-[#2E9B4E]",
+    chip: "bg-[#2E9B4E] text-white",
+  },
+  {
+    name: "Machine Learning",             // light green
+    icon: Cpu,
+    card: "bg-[#F3F9E6] border-[#D5E8A8] hover:border-[#8CC63F]",
+    chip: "bg-[#8CC63F] text-white",
+  },
+  {
+    name: "Healthcare",                   // blue (UR navy)
+    icon: Microscope,
+    card: "bg-[#E8EFF8] border-[#BCCDE6] hover:border-[#1B4F8A]",
+    chip: "bg-[#1B4F8A] text-white",
+  },
+  {
+    name: "Agriculture",                  // light blue (ACEIoT sky blue)
+    icon: Leaf,
+    card: "bg-[#E6F5FB] border-[#B3E0F3] hover:border-[#29A3DC]",
+    chip: "bg-[#29A3DC] text-white",
+  },
+  {
+    name: "IoT & Sensors",                // yellow (ACEIoT gold)
+    icon: Radar,
+    card: "bg-[#FFF6D6] border-[#F5E19A] hover:border-[#F5B800]",
+    chip: "bg-[#F5B800] text-slate-900",
+  },
+  {
+    name: "Computer Vision",              // light yellow
+    icon: Sparkles,
+    card: "bg-[#FFFBEA] border-[#F9EBB0] hover:border-[#FBD85D]",
+    chip: "bg-[#FBD85D] text-slate-900",
+  },
+  {
+    name: "Cybersecurity",                // beige
+    icon: Shield,
+    card: "bg-[#F7F2EA] border-[#E3D8C6] hover:border-[#C9B79C]",
+    chip: "bg-[#C9B79C] text-slate-900",
+  },
+  {
+    name: "Remote Sensing",               // deep teal (TAIRI "T")
+    icon: Database,
+    card: "bg-[#E4F2EF] border-[#B5D9D2] hover:border-[#0B6E5E]",
+    chip: "bg-[#0B6E5E] text-white",
+  },
 ];
+
 
 export default function LandingPage() {
   const router = useRouter();
@@ -68,9 +108,9 @@ export default function LandingPage() {
     <>
       {/* Hero with background photo */}
       <section
-        className="relative overflow-hidden border-b border-border bg-cover bg-center"
-        style={{ backgroundImage: "url('/hero.jpg')" }}
-      >
+  className="relative overflow-hidden border-b border-border bg-cover bg-center"
+  style={{ backgroundImage: "url('/hero.jpg')" }}
+>
         {/* Dark blue overlay so the text stays readable on the photo */}
         <div
           className="absolute inset-0"
