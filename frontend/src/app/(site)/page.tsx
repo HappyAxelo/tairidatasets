@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  ArrowRight,
   Brain,
   Cpu,
   Database,
@@ -18,7 +17,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DatasetCard } from "@/components/dataset-card";
 import { api } from "@/lib/api";
 import type { DatasetListItem, Page } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
@@ -79,25 +77,19 @@ const DOMAINS = [
 export default function LandingPage() {
   const router = useRouter();
   const [q, setQ] = useState("");
-  const [featured, setFeatured] = useState<DatasetListItem[]>([]);
-  const [latest, setLatest] = useState<DatasetListItem[]>([]);
   const [stats, setStats] = useState({ datasets: 0, downloads: 0, domains: 16 });
 
+  // Only used for the hero stats (dataset count and downloads)
   useEffect(() => {
     api
       .get<Page<DatasetListItem>>("/datasets?sort=downloads&page_size=3", { auth: false })
       .then((p) => {
-        setFeatured(p.items);
         setStats((s) => ({
           ...s,
           datasets: p.total,
           downloads: p.items.reduce((a, d) => a + d.download_count, 0),
         }));
       })
-      .catch(() => {});
-    api
-      .get<Page<DatasetListItem>>("/datasets?sort=newest&page_size=6", { auth: false })
-      .then((p) => setLatest(p.items))
       .catch(() => {});
   }, []);
 
@@ -203,37 +195,6 @@ export default function LandingPage() {
           })}
         </div>
       </section>
-
-      {/* Featured */}
-      {featured.length > 0 && (
-        <section className="container-tight py-8">
-          <div className="flex items-end justify-between">
-            <SectionHeading title="Featured datasets" subtitle="Most downloaded on the platform" />
-            <Link href="/datasets?sort=downloads" className="hidden sm:block">
-              <Button variant="ghost" size="sm">
-                View all <ArrowRight size={15} />
-              </Button>
-            </Link>
-          </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((d, i) => (
-              <DatasetCard key={d.id} dataset={d} index={i} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Latest */}
-      {latest.length > 0 && (
-        <section className="container-tight py-12">
-          <SectionHeading title="Latest uploads" subtitle="Recently published research data" />
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {latest.map((d, i) => (
-              <DatasetCard key={d.id} dataset={d} index={i} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Feature highlights */}
       <section className="border-y border-border bg-muted/40 py-16">
