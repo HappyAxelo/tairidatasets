@@ -22,57 +22,59 @@ import { DatasetCard } from "@/components/dataset-card";
 import { api } from "@/lib/api";
 import type { DatasetListItem, Page } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
-const domains = [
+
+// Colours are matched to the UR, ACEIoT and TAIRI logos.
+// Full class names are written out so Tailwind keeps them at build time.
+const DOMAINS = [
   {
-    name: "Artificial Intelligence",      // green (ACEIoT green)
+    label: "Artificial Intelligence", // green
     icon: Brain,
     card: "bg-[#EAF6EC] border-[#BFE3C7] hover:border-[#2E9B4E]",
     chip: "bg-[#2E9B4E] text-white",
   },
   {
-    name: "Machine Learning",             // light green
+    label: "Machine Learning", // light green
     icon: Cpu,
     card: "bg-[#F3F9E6] border-[#D5E8A8] hover:border-[#8CC63F]",
     chip: "bg-[#8CC63F] text-white",
   },
   {
-    name: "Healthcare",                   // blue (UR navy)
+    label: "Healthcare", // blue
     icon: Microscope,
     card: "bg-[#E8EFF8] border-[#BCCDE6] hover:border-[#1B4F8A]",
     chip: "bg-[#1B4F8A] text-white",
   },
   {
-    name: "Agriculture",                  // light blue (ACEIoT sky blue)
+    label: "Agriculture", // light blue
     icon: Leaf,
     card: "bg-[#E6F5FB] border-[#B3E0F3] hover:border-[#29A3DC]",
     chip: "bg-[#29A3DC] text-white",
   },
   {
-    name: "IoT & Sensors",                // yellow (ACEIoT gold)
+    label: "IoT & Sensors", // yellow
     icon: Radar,
     card: "bg-[#FFF6D6] border-[#F5E19A] hover:border-[#F5B800]",
     chip: "bg-[#F5B800] text-slate-900",
   },
   {
-    name: "Computer Vision",              // light yellow
+    label: "Computer Vision", // light yellow
     icon: Sparkles,
     card: "bg-[#FFFBEA] border-[#F9EBB0] hover:border-[#FBD85D]",
     chip: "bg-[#FBD85D] text-slate-900",
   },
   {
-    name: "Cybersecurity",                // beige
+    label: "Cybersecurity", // beige
     icon: Shield,
     card: "bg-[#F7F2EA] border-[#E3D8C6] hover:border-[#C9B79C]",
     chip: "bg-[#C9B79C] text-slate-900",
   },
   {
-    name: "Remote Sensing",               // deep teal (TAIRI "T")
+    label: "Remote Sensing", // deep teal
     icon: Database,
     card: "bg-[#E4F2EF] border-[#B5D9D2] hover:border-[#0B6E5E]",
     chip: "bg-[#0B6E5E] text-white",
   },
 ];
-
 
 export default function LandingPage() {
   const router = useRouter();
@@ -108,9 +110,9 @@ export default function LandingPage() {
     <>
       {/* Hero with background photo */}
       <section
-  className="relative overflow-hidden border-b border-border bg-cover bg-center"
-  style={{ backgroundImage: "url('/hero.jpg')" }}
->
+        className="relative overflow-hidden border-b border-border bg-cover bg-center"
+        style={{ backgroundImage: "url('/hero.jpg')" }}
+      >
         {/* Dark blue overlay so the text stays readable on the photo */}
         <div
           className="absolute inset-0"
@@ -142,7 +144,10 @@ export default function LandingPage() {
 
             <form onSubmit={submit} className="mt-8 flex max-w-xl gap-2">
               <div className="relative flex-1">
-                <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint" />
+                <Search
+                  size={18}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint"
+                />
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
@@ -172,23 +177,30 @@ export default function LandingPage() {
           subtitle="Datasets spanning the University of Rwanda's core research areas"
         />
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {DOMAINS.map((d, i) => (
-            <motion.div
-              key={d.label}
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.25, delay: i * 0.03 }}
-            >
-              <Link
-                href={`/datasets?q=${encodeURIComponent(d.label)}`}
-                className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3.5 text-sm font-medium text-ink-soft transition hover:border-brand-300 hover:text-brand-700"
+          {DOMAINS.map((d, i) => {
+            const Icon = d.icon;
+            return (
+              <motion.div
+                key={d.label}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.25, delay: i * 0.03 }}
               >
-                <span className="text-brand-600">{d.icon}</span>
-                {d.label}
-              </Link>
-            </motion.div>
-          ))}
+                <Link
+                  href={`/datasets?q=${encodeURIComponent(d.label)}`}
+                  className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm font-medium text-ink shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${d.card}`}
+                >
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${d.chip}`}
+                  >
+                    <Icon size={18} />
+                  </span>
+                  {d.label}
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
@@ -225,21 +237,30 @@ export default function LandingPage() {
 
       {/* Feature highlights */}
       <section className="border-y border-border bg-muted/40 py-16">
-        <div className="container-tight grid gap-8 md:grid-cols-3">
+        <div className="container-tight grid gap-6 md:grid-cols-3">
           <Feature
             icon={<Shield size={22} />}
             title="Secure & governed"
             text="Granular access control, approval workflows and full audit logging keep sensitive research data protected."
+            card="bg-[#F4F8FD] border-[#D3E0F2] hover:border-[#1B4F8A]"
+            bar="bg-[#1B4F8A]"
+            chip="bg-[#1B4F8A] text-white"
           />
           <Feature
             icon={<Database size={22} />}
             title="Any data type"
-            text="CSV, images, audio, video, medical scans, satellite imagery, notebooks no restrictions on formats."
+            text="CSV, images, audio, video, medical scans, satellite imagery, notebooks: no restrictions on formats."
+            card="bg-[#FFFBEB] border-[#F5E4A6] hover:border-[#F5B800]"
+            bar="bg-[#F5B800]"
+            chip="bg-[#F5B800] text-slate-900"
           />
           <Feature
             icon={<Download size={22} />}
             title="Citable science"
             text="Automatic APA, IEEE and BibTeX citations with DOI-ready metadata for reproducible research."
+            card="bg-[#F1F9F4] border-[#C6E5D0] hover:border-[#2E9B4E]"
+            bar="bg-[#2E9B4E]"
+            chip="bg-[#2E9B4E] text-white"
           />
         </div>
       </section>
@@ -254,12 +275,20 @@ export default function LandingPage() {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/register">
-              <Button size="lg" variant="secondary" className="bg-white text-brand-700 hover:bg-brand-50">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="bg-white text-brand-700 hover:bg-brand-50"
+              >
                 Get started
               </Button>
             </Link>
             <Link href="/about">
-              <Button size="lg" variant="outline" className="border-white/40 bg-transparent text-white hover:bg-white/10">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/40 bg-transparent text-white hover:bg-white/10"
+              >
                 Learn more
               </Button>
             </Link>
@@ -273,7 +302,9 @@ export default function LandingPage() {
 function Stat({ value, label, light = false }: { value: string; label: string; light?: boolean }) {
   return (
     <div>
-      <p className={light ? "text-2xl font-bold text-white" : "text-2xl font-bold text-ink"}>{value}</p>
+      <p className={light ? "text-2xl font-bold text-white" : "text-2xl font-bold text-ink"}>
+        {value}
+      </p>
       <p className={light ? "text-sm text-white/70" : "text-sm text-ink-faint"}>{label}</p>
     </div>
   );
@@ -288,13 +319,30 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
   );
 }
 
-function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+function Feature({
+  icon,
+  title,
+  text,
+  card,
+  bar,
+  chip,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+  card: string;
+  bar: string;
+  chip: string;
+}) {
   return (
-    <div>
-      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+    <div
+      className={`group relative overflow-hidden rounded-2xl border p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${card}`}
+    >
+      <div className={`absolute inset-x-0 top-0 h-1.5 ${bar}`} />
+      <div className={`flex h-12 w-12 items-center justify-center rounded-xl shadow-sm ${chip}`}>
         {icon}
       </div>
-      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+      <h3 className="mt-5 text-base font-semibold text-ink">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{text}</p>
     </div>
   );
