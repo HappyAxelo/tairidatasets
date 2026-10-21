@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -32,50 +33,64 @@ function LoginInner() {
   };
 
   return (
-    <div className="mx-auto flex max-w-md flex-col justify-center px-6 py-20">
-      <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
-      <p className="mt-1 text-sm text-ink-faint">Access your TAIRI DataHub account</p>
+    <div className="relative isolate flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-6 py-20">
+      {/* Background image */}
+      <Image
+        src="/hello.jpg"
+        alt=""
+        fill
+        priority
+        className="object-cover"
+      />
 
-      <form onSubmit={submit} className="mt-8 space-y-4">
-        <div>
-          <Label>Email address</Label>
-          <Input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@ur.ac.rw"
-          />
-        </div>
-        <div>
-          <div className="flex items-center justify-between">
-            <Label>Password</Label>
-            <Link href="/forgot-password" className="mb-1.5 text-xs text-brand-600 hover:underline">
-              Forgot password?
-            </Link>
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Sign-in card */}
+      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white/95 p-8 shadow-2xl backdrop-blur">
+        <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+        <p className="mt-1 text-sm text-ink-faint">Access your TAIRI DataHub account</p>
+
+        <form onSubmit={submit} className="mt-8 space-y-4">
+          <div>
+            <Label>Email address</Label>
+            <Input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@ur.ac.rw"
+            />
           </div>
-          <Input
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </div>
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing in..." : "Sign in"}
-        </Button>
-      </form>
+          <div>
+            <div className="flex items-center justify-between">
+              <Label>Password</Label>
+              <Link href="/forgot-password" className="mb-1.5 text-xs text-brand-600 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+            <Input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Sign in"}
+          </Button>
+        </form>
 
-      <p className="mt-6 text-center text-sm text-ink-faint">
-        No account?{" "}
-        <Link href="/register" className="font-medium text-brand-600 hover:underline">
-          Create one
-        </Link>
-      </p>
-
+        <p className="mt-6 text-center text-sm text-ink-faint">
+          No account?{" "}
+          <Link href="/register" className="font-medium text-brand-600 hover:underline">
+            Create one
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
