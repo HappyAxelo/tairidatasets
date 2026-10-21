@@ -43,7 +43,7 @@ export function Navbar() {
               key={l.href}
               href={l.href}
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium text-ink-soft hover:bg-muted hover:text-ink",
+                "rounded-md px-3 py-2 text-sm font-bold text-ink-soft hover:bg-muted hover:text-ink",
                 pathname.startsWith(l.href) && "text-brand-700"
               )}
             >
@@ -118,7 +118,7 @@ export function Navbar() {
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
               <Link href="/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="font-bold">
                   Sign in
                 </Button>
               </Link>
@@ -149,7 +149,7 @@ export function Navbar() {
               key={l.href}
               href={l.href}
               onClick={() => setMobileOpen(false)}
-              className="block py-2 text-sm font-medium text-ink-soft"
+              className="block py-2 text-sm font-bold text-ink-soft"
             >
               {l.label}
             </Link>
@@ -157,7 +157,7 @@ export function Navbar() {
           {!user && (
             <div className="mt-2 flex gap-2">
               <Link href="/login" className="flex-1">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full font-bold">
                   Sign in
                 </Button>
               </Link>
