@@ -1,4 +1,3 @@
-```python
 """Custom middleware: security headers and a lightweight rate limiter.
 
 The rate limiter is an in-process token bucket suitable for a single Nginx
@@ -85,6 +84,3 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         hits.append(now)
         self._hits[key] = hits
         return await call_next(request)
-
-```
-
