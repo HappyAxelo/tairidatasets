@@ -8,6 +8,7 @@ const COLUMNS = [
       { href: "/datasets", label: "Browse datasets" },
       { href: "/register", label: "Create account" },
       { href: "/documentation", label: "Documentation" },
+       { href: "/patners", label: "patners" },
     ],
   },
   {
