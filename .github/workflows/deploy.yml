@@ -2,6 +2,10 @@ name: Deploy
 
 # Runs after the CI workflow passes on main, so broken code is never deployed.
 # Can also be started by hand from the Actions tab ("Run workflow").
+#
+# The job runs on a self-hosted runner installed on the UR server itself: the
+# university firewall blocks inbound SSH from GitHub, but the runner connects
+# outbound to GitHub and picks the job up. See docs/DEPLOY_UR_SERVER.md.
 on:
   workflow_run:
     workflows: [CI]
@@ -17,20 +21,30 @@ jobs:
   deploy:
     name: Deploy to UR server
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ur-server]
     steps:
-      - name: Pull and rebuild on the server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          command_timeout: 30m
-          script: |
-            set -e
-            cd /opt/tairidatasets
-            git pull --ff-only origin main
-            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
-            docker image prune -f
-            docker compose -f docker-compose.prod.yml ps
+      - name: Pull and rebuild
+        working-directory: /opt/tairidatasets
+        run: |
+          set -e
+          git pull --ff-only origin main
+          docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+          # Nginx caches the backend/frontend container addresses at start-up;
+          # restart it so it reaches the freshly rebuilt containers.
+          docker compose -f docker-compose.prod.yml restart nginx
+          docker image prune -f
+
+      - name: Check the site responds
+        working-directory: /opt/tairidatasets
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/datahub/api/v1/taxonomy/licenses > /dev/null; then
+              echo "API is up."
+              docker compose -f docker-compose.prod.yml ps
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "API did not respond within 150s; recent backend logs:"
+          docker compose -f docker-compose.prod.yml logs backend --tail=50
+          exit 1

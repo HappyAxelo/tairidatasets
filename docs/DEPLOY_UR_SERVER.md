@@ -5,9 +5,9 @@ sub-folder of the existing `aceiot.ur.ac.rw` site, and sets up GitHub Actions
 so that **every push to `main` that passes CI is deployed automatically**.
 
 ```
-git push ──► CI (tests + build) ──► Deploy workflow ──SSH──► server
-                                                             git pull
-                                                             docker compose -f docker-compose.prod.yml up -d --build
+git push ──► CI (tests + build) ──► Deploy workflow ──► runner on the server
+                                                               git pull
+                                                               docker compose -f docker-compose.prod.yml up -d --build
 
 Browser ──► https://aceiot.ur.ac.rw/datahub ──► main web server (TLS)
                                                    └─► 127.0.0.1:8080  (Docker nginx)
@@ -113,24 +113,46 @@ sudo apachectl configtest && sudo systemctl reload apache2
 
 Open **https://aceiot.ur.ac.rw/datahub** — the site should load.
 
-## 6. Let GitHub deploy to the server (once)
+## 6. Install the GitHub runner on the server (once)
 
-On the server, create a key that only GitHub Actions uses:
+The university firewall blocks GitHub from connecting to the server over SSH,
+so deploys run on a **self-hosted runner**: a small GitHub program on the
+server that connects *out* to GitHub and picks up deploy jobs.
+
+First let the `aceiot` user run Docker and own the code (log out and back in
+afterwards):
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N ""
-cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys
-cat ~/.ssh/github_deploy          # copy this whole private key
+sudo usermod -aG docker aceiot
+sudo chown -R aceiot:aceiot /opt/tairidatasets
 ```
 
-In GitHub → repo → Settings → Secrets and variables → Actions → **New repository secret**:
+Then in GitHub → repo → Settings → Actions → Runners → **New self-hosted
+runner** → Linux / x64. Run the **Download** and **Configure** commands it
+shows, as `aceiot`, in `~/actions-runner`. When `config.sh` asks:
 
-| Secret | Value |
+| Question | Answer |
 |---|---|
-| `SERVER_HOST` | server IP or hostname |
-| `SERVER_USER` | the SSH user that owns `/opt/tairidatasets` |
-| `SERVER_SSH_KEY` | the private key printed above (including the BEGIN/END lines) |
-| `SERVER_PORT` | only if SSH is not on port 22 |
+| runner group | press Enter |
+| name of runner | `ur-server` |
+| additional labels | `ur-server` |
+| work folder | press Enter |
+
+Install it as a service so it survives reboots:
+
+```bash
+cd ~/actions-runner
+sudo ./svc.sh install aceiot
+sudo ./svc.sh start
+```
+
+The runner should now show as **Idle** (green) on the Runners page.
+
+> **Security (public repository):** a self-hosted runner executes workflow
+> code on the server. In GitHub → Settings → Actions → General → "Approval
+> for running fork pull request workflows from contributors", choose
+> **Require approval for all external contributors**, and never approve a
+> fork pull request that changes files in `.github/workflows/`.
 
 ## 7. Test auto-deploy
 
@@ -138,23 +160,8 @@ Push any small change to `main`. In GitHub → **Actions** you will see **CI**
 run, then **Deploy**. When Deploy is green, refresh the site.
 You can also start a deploy by hand: Actions → Deploy → **Run workflow**.
 
-> **Deploy fails with a timeout?** The university firewall probably blocks SSH
-> from the internet, so GitHub cannot reach the server. Use a self-hosted
-> runner instead (it connects *out* to GitHub, nothing inbound is needed):
-> GitHub → repo → Settings → Actions → Runners → **New self-hosted runner**,
-> run the shown commands on the server and install it as a service
-> (`sudo ./svc.sh install && sudo ./svc.sh start`). Then in
-> `.github/workflows/deploy.yml` change `runs-on: ubuntu-latest` to
-> `runs-on: self-hosted` and replace the `appleboy/ssh-action` step with:
->
-> ```yaml
->       - name: Pull and rebuild on the server
->         run: |
->           cd /opt/tairidatasets
->           git pull --ff-only origin main
->           docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
->           docker image prune -f
-> ```
+If Deploy stays "Queued", the runner is offline: `sudo ./svc.sh status` in
+`~/actions-runner`, and `sudo ./svc.sh start` to start it.
 
 ---
 
