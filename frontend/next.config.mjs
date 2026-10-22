@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Serve from a sub-folder such as https://aceiot.ur.ac.rw/datahub when set.
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
   // Docker (Render/self-host) needs the slim standalone server; on Vercel use
   // its native build output instead (Vercel sets the VERCEL env var).
   output: process.env.VERCEL ? undefined : "standalone",

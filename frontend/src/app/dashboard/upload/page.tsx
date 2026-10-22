@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/primitives";
 import { api, ApiError, tokenStore } from "@/lib/api";
 import type { DatasetDetail, License, Named } from "@/lib/types";
-import { humanSize } from "@/lib/utils";
+import { humanSize, withBase } from "@/lib/utils";
 
 const VISIBILITIES = [
   { value: "public", label: "Public — anyone can download" },
@@ -71,7 +71,7 @@ export default function UploadPage() {
       const fd = new FormData();
       files.forEach((f) => fd.append("files", f));
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", `/api/v1/datasets/${datasetId}/files`);
+      xhr.open("POST", withBase(`/api/v1/datasets/${datasetId}/files`));
       xhr.setRequestHeader("Authorization", `Bearer ${tokenStore.access}`);
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));

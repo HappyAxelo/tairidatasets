@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { DatasetListItem, Page } from "@/lib/types";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, withBase } from "@/lib/utils";
 
 // Colours are matched to the UR, ACEIoT and TAIRI logos.
 // Full class names are written out so Tailwind keeps them at build time.
@@ -103,7 +103,7 @@ export default function LandingPage() {
       {/* Hero with background photo */}
       <section
         className="relative overflow-hidden border-b border-border bg-cover bg-center"
-        style={{ backgroundImage: "url('/hero.jpg')" }}
+        style={{ backgroundImage: `url('${withBase("/hero.jpg")}')` }}
       >
         {/* Dark blue overlay so the text stays readable on the photo */}
         <div

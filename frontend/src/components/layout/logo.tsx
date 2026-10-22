@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, withBase } from "@/lib/utils";
 
 /** UR + ACEIoT, for the left side of the header */
 export function PartnerLogos({ className, mono = false }: { className?: string; mono?: boolean }) {
@@ -9,7 +9,7 @@ export function PartnerLogos({ className, mono = false }: { className?: string; 
       <a href="https://www.ur.ac.rw" target="_blank" rel="noopener noreferrer">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/URbg.png"
+          src={withBase("/URbg.png")}
           alt="University of Rwanda"
           className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
         />
@@ -17,7 +17,7 @@ export function PartnerLogos({ className, mono = false }: { className?: string; 
       <span className={cn("h-10 w-px", mono ? "bg-white/20" : "bg-ink/10")} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/ACEIoTbg.png"
+        src={withBase("/ACEIoTbg.png")}
         alt="ACEIoT"
         className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105 sm:h-16"
       />
@@ -30,7 +30,7 @@ export function TairiLogo({ className, mono = false }: { className?: string; mon
   return (
     <Link href="/" className={cn("group inline-flex items-center gap-3", className)}>
       <Image
-        src="/TAIRILOGO.png"
+        src={withBase("/TAIRILOGO.png")}
         alt="TAIRI"
         width={160}
         height={80}

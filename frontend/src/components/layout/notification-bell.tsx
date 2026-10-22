@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Bell, Check } from "lucide-react";
 import { api, tokenStore } from "@/lib/api";
 import type { Notification } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, withBase } from "@/lib/utils";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
@@ -35,7 +35,7 @@ export function NotificationBell() {
       try {
         const proto = window.location.protocol === "https:" ? "wss" : "ws";
         const ws = new WebSocket(
-          `${proto}://${window.location.host}/api/v1/notifications/ws?token=${token}`
+          `${proto}://${window.location.host}${withBase("/api/v1/notifications/ws")}?token=${token}`
         );
         ws.onmessage = () => load();
         wsRef.current = ws;

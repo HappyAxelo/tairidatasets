@@ -1,0 +1,91 @@
+# TAIRI DataHub — production deployment on the UR server, served from a
+# sub-folder of an existing site (https://aceiot.ur.ac.rw/datahub).
+#
+# Differences from docker-compose.yml:
+#   * The frontend is built with NEXT_PUBLIC_BASE_PATH=/datahub.
+#   * Nginx listens on 127.0.0.1:8080 only; the server's main web server
+#     forwards /datahub to it (see infrastructure/nginx/host-datahub.conf).
+#   * Secrets have no defaults — the stack refuses to start without .env.
+#
+# Usage (on the server, in the repo folder):
+#   cp .env.example .env   # then edit every value
+#   docker compose -f docker-compose.prod.yml up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [tairi]
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "False"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:?set BACKEND_CORS_ORIGINS in .env}
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      FRONTEND_URL: ${FRONTEND_URL:?set FRONTEND_URL in .env}
+      SUPERADMIN_EMAILS: ${SUPERADMIN_EMAILS:?set SUPERADMIN_EMAILS in .env}
+      SUPERADMIN_DEFAULT_PASSWORD: ${SUPERADMIN_DEFAULT_PASSWORD:?set SUPERADMIN_DEFAULT_PASSWORD in .env}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    volumes:
+      - storage:/app/storage
+    networks: [tairi]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BACKEND_INTERNAL_URL: http://backend:8000
+        NEXT_PUBLIC_BASE_PATH: ${BASE_PATH:-/datahub}
+    restart: unless-stopped
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8000
+    depends_on:
+      - backend
+    networks: [tairi]
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      # Only reachable from the server itself; the main web server proxies to it.
+      - "127.0.0.1:${APP_PORT:-8080}:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks: [tairi]
+
+volumes:
+  pgdata:
+  storage:
+
+networks:
+  tairi:
+    driver: bridge

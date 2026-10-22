@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/primitives";
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
+import { withBase } from "@/lib/utils";
 
 function LoginInner() {
   const { login } = useAuth();
@@ -36,7 +37,7 @@ function LoginInner() {
     <div className="relative isolate flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-6 py-20">
       {/* Background image */}
       <Image
-        src="/hello.jpg"
+        src={withBase("/hello.jpg")}
         alt=""
         fill
         priority

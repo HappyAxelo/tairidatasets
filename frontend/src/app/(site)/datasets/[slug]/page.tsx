@@ -27,7 +27,7 @@ import { RequestAccessModal } from "@/components/request-access-modal";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { DatasetDetail } from "@/lib/types";
-import { fileExtension, formatNumber, humanSize } from "@/lib/utils";
+import { fileExtension, formatNumber, humanSize, withBase } from "@/lib/utils";
 
 const TABS = ["Overview", "Files", "Versions", "Citation"] as const;
 type Tab = (typeof TABS)[number];
@@ -70,7 +70,7 @@ export default function DatasetDetailPage({ params }: { params: Promise<{ slug: 
       return;
     }
     try {
-      const res = await fetch(`/api/v1/datasets/${dataset!.id}/files/${fileId}/download`, {
+      const res = await fetch(withBase(`/api/v1/datasets/${dataset!.id}/files/${fileId}/download`), {
         headers: { Authorization: `Bearer ${localStorage.getItem("tairi_access")}` },
       });
       if (res.status === 403) {

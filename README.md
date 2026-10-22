@@ -146,6 +146,7 @@ tairidatasets/
 |-------|-------------|
 | [Installation](docs/INSTALLATION.md) | Local and server installation |
 | [Deployment](docs/DEPLOYMENT.md) | Deploying on a University of Rwanda Ubuntu server |
+| [Deploy to aceiot.ur.ac.rw/datahub](docs/DEPLOY_UR_SERVER.md) | Auto-deploy from GitHub to the UR server under /datahub |
 | [Architecture](docs/ARCHITECTURE.md) | System architecture & request flow |
 | [ER Diagram](docs/ER_DIAGRAM.md) | Database entity–relationship model |
 | [API Reference](docs/API.md) | REST endpoints overview |

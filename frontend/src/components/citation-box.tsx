@@ -5,6 +5,7 @@ import { Check, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { withBase } from "@/lib/utils";
 
 type Styles = { apa: string; ieee: string; bibtex: string };
 const TABS: { key: keyof Styles; label: string }[] = [
@@ -50,7 +51,7 @@ export function CitationBox({ slug }: { slug: string }) {
           <Button variant="ghost" size="sm" onClick={copy}>
             {copied ? <Check size={14} /> : <Copy size={14} />} Copy
           </Button>
-          <a href={`/api/v1/citations/${slug}/bibtex`} download>
+          <a href={withBase(`/api/v1/citations/${slug}/bibtex`)} download>
             <Button variant="ghost" size="sm">
               <Download size={14} /> .bib
             </Button>

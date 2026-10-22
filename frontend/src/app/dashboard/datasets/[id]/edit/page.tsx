@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Spinner, Textarea } from "@/components/ui/primitives";
 import { api, ApiError, tokenStore } from "@/lib/api";
 import type { DatasetDetail, License } from "@/lib/types";
+import { withBase } from "@/lib/utils";
 
 export default function EditDatasetPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -65,7 +66,7 @@ export default function EditDatasetPage({ params }: { params: Promise<{ id: stri
       Array.from(files).forEach((f) => fd.append("files", f));
       fd.append("version_id", String(version.id));
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", `/api/v1/datasets/${dataset.id}/files`);
+      xhr.open("POST", withBase(`/api/v1/datasets/${dataset.id}/files`));
       xhr.setRequestHeader("Authorization", `Bearer ${tokenStore.access}`);
       xhr.onload = () => {
         if (xhr.status < 300) { toast.success("New version uploaded"); router.refresh(); }

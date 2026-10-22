@@ -38,3 +38,12 @@ export function fileExtension(filename: string): string {
   const parts = filename.split(".");
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : "";
 }
+
+// Path prefix when the site is served from a sub-folder (e.g. "/datahub").
+// Next.js adds it to <Link> and router navigation automatically, but plain
+// fetch/XHR/WebSocket URLs, <img> tags and CSS backgrounds need it explicitly.
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+export function withBase(path: string): string {
+  return `${BASE_PATH}${path}`;
+}

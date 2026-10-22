@@ -3,6 +3,7 @@
 // in dev and by Nginx in production).
 
 import type { Tokens } from "./types";
+import { withBase } from "./utils";
 
 const ACCESS_KEY = "tairi_access";
 const REFRESH_KEY = "tairi_refresh";
@@ -34,7 +35,7 @@ export class ApiError extends Error {
   }
 }
 
-const BASE = "/api/v1";
+const BASE = withBase("/api/v1");
 
 async function refreshAccessToken(): Promise<boolean> {
   const refresh = tokenStore.refresh;

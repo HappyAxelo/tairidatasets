@@ -13,6 +13,9 @@ COPY . .
 # the service's BACKEND_INTERNAL_URL in via this build arg.
 ARG BACKEND_INTERNAL_URL
 ENV BACKEND_INTERNAL_URL=$BACKEND_INTERNAL_URL
+# Sub-folder the site is served from (e.g. /datahub); empty = domain root.
+ARG NEXT_PUBLIC_BASE_PATH=""
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
