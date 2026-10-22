@@ -1,9 +1,4 @@
-"""Custom middleware: security headers and a lightweight rate limiter.
-
-The rate limiter is an in-process token bucket suitable for a single Nginx
-worker / single API instance. For a multi-instance deployment behind a load
-balancer, swap the backing store for Redis (the interface stays identical).
-"""
+"""Custom middleware: security headers and a lightweight rate limiter."""
 from __future__ import annotations
 
 import time
@@ -30,14 +25,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Fixed-window rate limiter keyed by client IP.
 
-    General traffic and auth endpoints are counted in separate buckets; auth
-    endpoints get a stricter budget to slow credential-stuffing.
+    Login/auth endpoints are exempt, so sign-in is never blocked.
+    All other traffic is still limited.
     """
 
-    def __init__(self, app, limit: int = 1_000_000, window: int = 120) -> None:
+    # Paths that are never rate limited.
+    EXEMPT_PREFIXES = ("/docs", "/redoc", "/openapi")
+    EXEMPT_SUFFIXES = (
+        "/login",
+        "/login/json",
+        "/register",
+        "/forgot-password",
+        "/reset-password",
+        "/me",  # /auth/me also returned 429 on the live site
+    )
+
+    def __init__(self, app) -> None:
         super().__init__(app)
-        self.limit = limit
-        self.window = window
         self._hits: dict[str, list[float]] = defaultdict(list)
 
     def _client(self, request: Request) -> str:
@@ -49,29 +53,20 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         from app.core.config import settings
 
-        # Skip when disabled (tests) and for docs endpoints.
-        if not settings.RATE_LIMIT_ENABLED or request.url.path.startswith(
-            ("/docs", "/redoc", "/openapi")
+        path = request.url.path
+
+        if (
+            not settings.RATE_LIMIT_ENABLED
+            or path.startswith(self.EXEMPT_PREFIXES)
+            or path.endswith(self.EXEMPT_SUFFIXES)
         ):
             return await call_next(request)
 
-        # Auth surfaces get their own, stricter bucket. Keeping it separate means
-        # ordinary browsing (which fires many API calls per page) can never
-        # use up a visitor's login budget.
-        is_auth = request.url.path.endswith(
-            ("/login", "/login/json", "/register", "/forgot-password", "/reset-password")
-        )
         client = self._client(request)
-        key = f"auth:{client}" if is_auth else client
-        limit = (
-    settings.RATE_LIMIT_AUTH_REQUESTS
-    if is_auth
-    else settings.RATE_LIMIT_REQUESTS
-)
-        now = time.time()
+        limit = settings.RATE_LIMIT_REQUESTS
         window = settings.RATE_LIMIT_WINDOW_SECONDS
-        window_start = now - window
-        hits = [t for t in self._hits[key] if t > window_start]
+        now = time.time()
+        hits = [t for t in self._hits[client] if t > now - window]
 
         if len(hits) >= limit:
             retry_after = max(1, int(window - (now - hits[0])) + 1)
@@ -82,5 +77,5 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             )
 
         hits.append(now)
-        self._hits[key] = hits
+        self._hits[client] = hits
         return await call_next(request)
