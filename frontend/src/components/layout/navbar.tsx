@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LayoutDashboard, LogOut, Menu, Search, Upload, User, X } from "lucide-react";
 import { PartnerLogos, TairiLogo } from "./logo";
 import { NotificationBell } from "./notification-bell";
@@ -17,13 +17,43 @@ const NAV_LINKS = [
   { href: "/documentation", label: "Docs" },
 ];
 
+const RESEARCH_LINKS = [
+  { href: "/research/datasets", label: "Datasets" },
+  { href: "/research/publications", label: "Publication Papers" },
+  { href: "/research/conferences", label: "Conference Papers" },
+  { href: "/research/masters-theses", label: "Master's Theses" },
+  { href: "/research/phd-theses", label: "PhD Theses" },
+];
+
 export function Navbar() {
   const { user, logout, isRole } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [researchOpen, setResearchOpen] = useState(false); // desktop dropdown
+  const [mobileResearchOpen, setMobileResearchOpen] = useState(false); // mobile accordion
   const [q, setQ] = useState("");
+  const researchRef = useRef<HTMLDivElement>(null);
+
+  const researchActive = pathname.startsWith("/research");
+
+  // Close the Research dropdown when clicking outside it
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (researchRef.current && !researchRef.current.contains(e.target as Node)) {
+        setResearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Close everything when the route changes
+  useEffect(() => {
+    setResearchOpen(false);
+    setMobileOpen(false);
+  }, [pathname]);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +80,47 @@ export function Navbar() {
               {l.label}
             </Link>
           ))}
+
+          {/* Research dropdown (right after Docs) */}
+          <div className="relative" ref={researchRef}>
+            <button
+              onClick={() => setResearchOpen((o) => !o)}
+              aria-haspopup="menu"
+              aria-expanded={researchOpen}
+              className={cn(
+                "flex items-center gap-1 rounded-md px-3 py-2 text-sm font-bold text-ink-soft hover:bg-muted hover:text-ink",
+                researchActive && "text-brand-700"
+              )}
+            >
+              Research
+              <ChevronDown
+                size={14}
+                className={cn("transition-transform", researchOpen && "rotate-180")}
+              />
+            </button>
+
+            {researchOpen && (
+              <div
+                role="menu"
+                className="absolute left-0 top-full z-50 mt-1 w-56 animate-fade-in overflow-hidden rounded-lg border border-border bg-white shadow-pop"
+              >
+                {RESEARCH_LINKS.map((r) => (
+                  <Link
+                    key={r.href}
+                    href={r.href}
+                    role="menuitem"
+                    onClick={() => setResearchOpen(false)}
+                    className={cn(
+                      "block px-4 py-2.5 text-sm text-ink-soft hover:bg-muted hover:text-ink",
+                      pathname.startsWith(r.href) && "bg-brand-50 font-semibold text-brand-700"
+                    )}
+                  >
+                    {r.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         <form onSubmit={submitSearch} className="ml-auto hidden max-w-xs flex-1 xl:block">
@@ -142,8 +213,9 @@ export function Navbar() {
         </div>
       </div>
 
+      {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="border-t border-border bg-white px-6 py-3 md:hidden">
+        <div className="max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-border bg-white px-6 py-3 md:hidden">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
@@ -154,6 +226,43 @@ export function Navbar() {
               {l.label}
             </Link>
           ))}
+
+          {/* Research accordion */}
+          <button
+            onClick={() => setMobileResearchOpen((o) => !o)}
+            aria-expanded={mobileResearchOpen}
+            className={cn(
+              "flex w-full items-center justify-between py-2 text-sm font-bold text-ink-soft",
+              researchActive && "text-brand-700"
+            )}
+          >
+            Research
+            <ChevronDown
+              size={16}
+              className={cn("transition-transform", mobileResearchOpen && "rotate-180")}
+            />
+          </button>
+          {mobileResearchOpen && (
+            <div className="mb-1 ml-3 border-l border-border pl-3">
+              {RESEARCH_LINKS.map((r) => (
+                <Link
+                  key={r.href}
+                  href={r.href}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setMobileResearchOpen(false);
+                  }}
+                  className={cn(
+                    "block py-2 text-sm text-ink-soft",
+                    pathname.startsWith(r.href) && "font-semibold text-brand-700"
+                  )}
+                >
+                  {r.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
           {!user && (
             <div className="mt-2 flex gap-2">
               <Link href="/login" className="flex-1">

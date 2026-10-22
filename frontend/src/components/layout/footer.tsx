@@ -36,8 +36,8 @@ export function Footer() {
       <div className="container-tight grid gap-10 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
           {/* White strip keeps the three logos readable on the green background */}
-          <div className="inline-block rounded-xl bg-white px-4 py-3 shadow-sm">
-            <Logo />
+          <div className="inline-block rounded-xl bg-white px-5 py-4 shadow-sm">
+            <Logo className="[&_img]:h-14 [&_img]:w-auto [&_img]:max-w-none md:[&_img]:h-16" />
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#CDEBE5]">
             A trusted repository for AI research datasets, developed by the Trustworthy
